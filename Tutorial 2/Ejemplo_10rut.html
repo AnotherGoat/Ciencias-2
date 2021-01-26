@@ -1,0 +1,23 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+</head>
+
+<body>
+	
+	Probando... <hr/>
+	<script>
+		var exp = /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-(k|[0-9]{1})$/i;
+
+		document.writeln("<br>1.- "+exp.test("8.340.260-3"));
+		document.writeln("<br>2.- "+exp.test("8 .340.260-3"));
+		document.writeln("<br>3.- "+exp.test("8.340.260-33"));
+		document.writeln("<br>4.- "+exp.test("900.234.433-K"));
+		document.writeln("<br>5.- "+exp.test("76.234.433-K"));
+		document.writeln("<br>6.- "+exp.test(".234.433-8"));
+		document.writeln("<br>7.- "+exp.test("970.234.433-K"));
+		document.writeln("<br>8.- "+exp.test("9340960-7"));
+	</script>
+
+</body>
+</html>
