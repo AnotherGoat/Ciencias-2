@@ -1,0 +1,221 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<script>
+	// Para probar que funciona, le hice 2 cambios al autómata original:
+	// 1. Los estados iniciales ahora son s4, fin y s0 (todos)
+	// 2. El delta tiene una transición adicional: (s0,c,W)=s4/AW
+	var estados = "s0,s4,fin";
+	var alfabeto = "a,b,c";
+	var delta = "(s0,a,A)=s0/AA;(s0,a,W)=s0/AW;(s0,b,A)=s4/_;(s4,c,A)=s0/A;(s4,b,A)=s4/_;(s4,a,A)=s4/_;(s0,c,W)=fin/_;(s0,c,W)=s4/AW";
+	var iniciales = "s4,fin,s0"; // Ahora acepta más de un estado inicial
+	var pila_inicial = "W";
+	var finales = "s4,fin";
+	// para desempilar se usa _
+
+	// crea variables para proceso de autómata con pila
+	var transicion = delta.split(";");
+	var estadosF = finales.split(",");
+	// Separa los estados iniciales al igual que como ocurría con los finales
+	var estadosI = iniciales.split(",");
+	var par = [];
+	var resultado = [];
+	var nuevotope = [];
+	var taux;
+	var stopmsg = "Proceso normal";
+	var traza  = "";
+
+	// prepara vectores globales para transiciones
+	for (var i=0; i<transicion.length; i++) {
+		taux = transicion[i].split("=");
+		par.push(taux[0]);
+		resultado.push(taux[1].split("/")[0]);
+		nuevotope.push(taux[1].split("/")[1]);
+	}
+
+	// Variable donde se almacena el boolean para saber si se debe trazar o no
+	var trazable;
+
+function procesaTodo(){
+
+	// Almacena el resultado del checkbox
+	trazable = document.getElementById("traza").checked;
+	// Inicia la traza vacía
+	traza = "";
+
+	var txArea = document.getElementById("todo");
+	var tx = txArea.value;
+	var pal = tx.split("\n");
+	var out = "";
+
+	for (var i=0; i<pal.length; i++) {
+		// La traza se queda vacía si el checkbox no está marcado
+		// También añadí el mismo if al resto de cambios a la traza
+		if (trazable) {
+			traza += "<br><hr><u><b>Procesando "+pal[i]+"</b></u>";
+		}
+
+		// Añadí logs para describir todo el proceso en la consola e ir probando poco a poco si los cambios al código funcionan
+		console.log("+++++++++++++++++++++++++++++++++++++");
+		console.log("Procesando palabra "+pal[i]);
+		out += pal[i]+" --> "+procesaPalabra(pal[i])+"<br>";
+	}
+
+	document.getElementById("salida").innerHTML = out;
+	document.getElementById("pasos").innerHTML = traza;
+}
+
+function procesaPalabra(palabra){
+	var letra = palabra.split("");
+
+	// Al principio, todos los estados actuales serán los estados iniciales
+	var estadosA = [];
+	for (var inicial of estadosI) {
+		estadosA.push(inicial+","+pila_inicial);
+	}
+	
+	console.log("Estados iniciales:");
+	console.log(estadosA);
+	console.log("-------------------------------------");
+
+	// El resto del proceso es el mismo, sólo que esta vez también registra los estados futuros
+	for (var k=0; k<letra.length && estadosA!==["error"]; k++) {
+		console.log("Procesando letra "+letra[k]);
+
+		if (trazable) {
+			traza += "<br><br><u>Letra "+letra[k]+"</u>";
+		}
+
+		var estadosFuturos = [];
+
+		// Procesa todos los estados actuales
+		for (var actual of estadosA) {
+
+			// Realiza el proceso sólo si el estado no es "error"
+			if(actual!="error") {
+				// Mensaje por defecto, lo tuve que mover aquí para que cambie por cada estado procesado
+				stopmsg = "Proceso normal";
+
+				estadosNuevos = cambiaEstado(letra[k], actual);
+
+				for (var estado of estadosNuevos) {
+					estadosFuturos.push(estado);
+
+					if (trazable) {
+						traza += "<br> "+letra[k]+" en "+actual;
+						traza += " --> "+estado;
+					}
+				}
+
+				console.log("Estado: "+actual.split(",")[0]+"\tPila: "+actual.split(",")[1]);
+				console.log(estadosFuturos);
+
+				if (trazable) {
+					traza += "<br>"+stopmsg;
+				}
+			}
+		}
+
+		// Agrupa los estados futuros que son iguales
+		estadosA = [... new Set(estadosFuturos)];
+
+		console.log("-------------------------------------");
+	}
+
+	console.log("Estados actuales después de procesar la palabra:")
+	console.log(estadosA);
+	console.log("Estados finales:")
+	console.log(estadosF);
+
+	// Revisa si al menos uno de los estados actuales es un estado final
+	for (var actual of estadosA) {
+		for (var final of estadosF) {
+			if (final.includes(actual.split(",")[0])){
+				console.log("Palabra "+palabra+": Aceptada");
+				return true;
+			}
+		}
+	}
+	
+	// Si ninguno es un estado final, retorna false
+	console.log("Palabra "+palabra+": No aceptada");
+	return false;
+}
+
+function cambiaEstado(letra,estadoComaPila){
+	var aux = estadoComaPila.split(",");
+	if (aux[1].length <= 0) {
+		stopmsg = "Intenta transición con pila vacía";
+		return ["error"];
+	}
+
+	var busca = "("+aux[0]+","+letra+","+aux[1].charAt(0)+")";
+	// Ahora retorna un arreglo, porque una transición puede llevar a más de un estado
+	var estadosNuevos = [];
+	// error cambia a false si se encuentra una transición válida en el for de abajo
+	error = true;
+
+	for (var k=0; k<par.length; k++) {
+		if (busca === par[k]) { // existe transición
+			error = false;
+
+			if (nuevotope[k] === "_") // desempila
+				estadosNuevos.push(resultado[k]+","+pop(aux[1]));
+			else				   // empila
+				estadosNuevos.push(resultado[k]+","+newtop(aux[1],nuevotope[k]));
+		}
+	}
+
+	if (error) { // no existe transición
+		stopmsg = "Indeterminación para "+busca;
+		return ["error"];
+	}
+
+	return estadosNuevos;
+}
+
+function newtop(pilaString,tope){
+	pilaString = pop(pilaString);
+	return tope+pilaString;
+}
+
+function pop(pilaString){
+	return pilaString.substring(1);
+}
+
+function w(msg){
+	document.write(msg);
+}
+
+</script>
+</head>
+<body>
+
+<h3>Autómata Empilador</h3>
+Estados = {<script>w(estados);</script>}<br>
+Alfabeto = {<script>w(alfabeto);</script>}<br>
+Transiciones = {<script>w(delta.replace(/;/gi," , "));</script>}<br>
+Finales = {<script>w(finales);</script>}<br>
+Iniciales = {<script>w(iniciales);</script>}<br>
+Palabras a procesar:<br>
+<table>
+<tr><td>
+<textarea cols=40 rows=12 id="todo">
+
+c
+aaabab
+aaaaabaacb
+cc
+ccc
+aba
+aaabbac</textarea>
+</td>
+<td id="salida" bgcolor="#AAFFAA"></td>
+</tr>
+</table>
+<br>
+<input id="traza" type="checkbox" checked>Trazable
+<button onclick="procesaTodo()">Procesar</button>
+<div id="pasos"></div>
+</body>
+</html>
