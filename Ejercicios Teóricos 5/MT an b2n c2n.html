@@ -1,0 +1,96 @@
+<html>
+<head>
+    <script src="class.MaquinaTuring.js"></script>
+    <script>
+        function procesarTodo() {
+            // Obtiene datos de la entrada
+            var areaTexto = document.getElementById("entrada");
+            var texto = areaTexto.value;
+            var palabras = texto.split("\n");
+            var resultado = "";
+
+            // Procesa cada palabra
+            for (palabra of palabras) {
+                resultado += palabra+" --> "+bc.procesaPalabra(palabra)+"<br>";
+            }
+
+            // Actualiza la salida en el documento HTML
+            document.getElementById("salida").innerHTML = resultado;
+        }
+    </script>
+    <style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    </style>
+</head>
+<body>
+    <script>
+        
+        // Configuración de la máquina de Turing
+        var bc = new MaquinaTuring("a^n c b^n, n >= 0");
+        bc.fija_estados("q0,a1,b1,b2,c1,c2,r,qf,f");
+        bc.fija_estado_inicial("q0");
+        bc.fija_estados_finales("f");
+
+        // q0
+        bc.agrega_transicion("q0","a","a1","A","D");
+        bc.agrega_transicion("q0","#","qf","#","D");
+        bc.agrega_transicion("q0","B","qf","B","D");
+
+        // a1
+        bc.agrega_transicion("a1","a","a1","a","D");
+        bc.agrega_transicion("a1","B","a1","B","D");
+        bc.agrega_transicion("a1","b","b1","B","D");
+
+        // b1
+        bc.agrega_transicion("b1","b","b2","B","D");
+
+        // b2
+        bc.agrega_transicion("b2","b","b2","b","D");
+        bc.agrega_transicion("b2","C","b2","C","D");
+        bc.agrega_transicion("b2","c","c1","C","D");
+
+        // c1
+        bc.agrega_transicion("c1","c","c2","C","D");
+
+        // c2
+        bc.agrega_transicion("c2","c","c2","c","D");
+        bc.agrega_transicion("c2","#","r","#","I");
+        
+        // r
+        bc.agrega_transicion("r","c","r","c","I");
+        bc.agrega_transicion("r","C","r","C","I");
+        bc.agrega_transicion("r","b","r","b","I");
+        bc.agrega_transicion("r","B","r","B","I");
+        bc.agrega_transicion("r","a","r","a","I");
+        bc.agrega_transicion("r","A","q0","A","D");
+
+        // qf
+        bc.agrega_transicion("qf","B","qf","B","D");
+        bc.agrega_transicion("qf","C","qf","C","D");
+        bc.agrega_transicion("qf","#","f","#","D");
+
+    </script>
+
+<h1>M&aacutequina de Turing</h1>
+<hr>
+<table><tr><th>Palabras:</th><th>Resultado:</th></tr>
+<tr>
+<td><textarea id="entrada" rows="15" cols="40" placeholder="Ingrese aqu&iacute las palabras que quiere evaluar">
+
+abbcc
+aabbbbcccc
+aaabbbbbbcccccc
+aaaabbbbbbbbcccccccc
+a
+b
+c
+aabbcccc
+ccccbbaa</textarea></td>
+<td id="salida" bgcolor="#FFAAAA"></td>
+</tr></table>
+<input type="button" value="Procesar" onclick="procesarTodo()">
+</body>
+</html>

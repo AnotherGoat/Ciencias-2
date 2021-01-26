@@ -1,0 +1,66 @@
+//-------CONFIGURATION
+name: T
+init: q0
+accept: f
+
+//-------DELTA FUNCTION:
+
+// q0
+q0,a
+a1,A,>
+q0,_
+qf,_,>
+q0,B
+qf,B,>
+
+// a1
+a1,a
+a1,a,>
+a1,B
+a1,B,>
+a1,b
+b1,B,>
+
+// b1
+b1,b
+b2,B,>
+
+// b2
+b2,b
+b2,b,>
+b2,C
+b2,C,>
+b2,c
+c1,C,>
+
+// c1
+c1,c
+c2,C,>
+
+// c2
+c2,c
+c2,c,>
+c2,_
+r,_,<
+
+// r
+r,c
+r,c,<
+r,C
+r,C,<
+r,b
+r,b,<
+r,B
+r,B,<
+r,a
+r,a,<
+r,A
+q0,A,>
+
+// qf
+qf,B
+qf,B,>
+qf,C
+qf,C,>
+qf,_
+f,_,>
