@@ -1,0 +1,151 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<script>	
+	var estados = "s0,s1,s2,s3,fin";
+	var alfabeto = "a,b";
+	var delta = "(s0,b,W)=s0/QW;(s0,b,A)=s0/_;(s0,b,B)=s0/BB;(s0,b,P)=s0/_;(s0,b,Q)=s0/BQ;(s0,a,W)=s1/PW;(s0,a,A)=s1/AA;(s0,a,B)=s1/_;(s0,a,P)=s1/AP;(s0,a,Q)=s1/_;(s1,a,W)=s1/PW;(s1,a,A)=s1/AA;(s1,a,B)=s1/_;(s1,a,P)=s1/AP;(s1,a,Q)=s1/_;(s1,b,W)=s2/QW;(s1,b,A)=s2/_;(s1,b,B)=s2/BB;(s1,b,P)=s2/_;(s1,b,Q)=s2/BQ;(s2,b,W)=s0/QW;(s2,b,A)=s0/_;(s2,b,B)=s0/BB;(s2,b,P)=s0/_;(s2,b,Q)=s0/BQ;(s2,a,Q)=fin/_;(s2,a,W)=s3/PW;(s2,a,A)=s3/AA;(s2,a,B)=s3/_;(s2,a,P)=s3/AP;(s3,a,A)=s3/AA;(s3,a,B)=s3/_;(s3,a,P)=s3/AP;(s3,b,A)=s3/_;(s3,b,B)=s3/BB;(s3,b,Q)=s3/BQ;(s3,a,Q)=fin/_;(s3,b,P)=fin/_;(fin,a,W)=s3/PW;(fin,b,W)=s3/QW";
+	var finales = "fin";
+	var inicial = "s0";
+	var pila_inicial = "W";
+	// para desempilar se usa _
+
+	// crea variables para proceso de autómata con pila
+	var transicion = delta.split(";");
+	var final = finales.split(",");
+	var par = [];
+	var resultado = [];
+	var nuevotope = [];
+	var taux;
+	var stopmsg = "Proceso normal";
+	var traza  = "";
+
+	// prepara vectores globales para transiciones
+	for (var i=0; i<transicion.length; i++) {
+		taux = transicion[i].split("=");
+		par.push(taux[0]);
+		resultado.push(taux[1].split("/")[0]);
+		nuevotope.push(taux[1].split("/")[1]);
+	}
+
+	// Variable donde se almacena el boolean para saber si se debe trazar o no
+	var trazable;
+
+function procesaTodo(){
+
+	// Almacena el resultado del checkbox
+	trazable = document.getElementById("traza").checked;
+	// Inicia la traza vacía
+	traza = "";
+
+	var txArea = document.getElementById("todo");
+	var tx = txArea.value;
+	var pal = tx.split("\n");
+	var out = "";
+
+	for (var i=0; i<pal.length; i++) {
+		stopmsg = "Proceso normal";
+
+		// La traza se queda vacía si el checkbox no está marcado
+		// También añadí el mismo if al resto de cambios a la traza
+		if (trazable) {
+			traza += "<br><br><u><b>Procesando "+pal[i]+"</b></u>";
+		}
+
+		out += pal[i]+" --> "+procesaPalabra(pal[i])+"<br>";
+	}
+
+	document.getElementById("salida").innerHTML = out;
+	document.getElementById("pasos").innerHTML = traza;
+}
+
+function procesaPalabra(palabra){
+	var letra = palabra.split("");
+	var actual = inicial+","+pila_inicial;
+	for (var i=0; i<letra.length && actual!="error"; i++) {
+		if (trazable) {
+			traza += "<br> "+letra[i]+" en "+actual;
+		}
+
+		actual = cambiaEstado(letra[i],actual);
+
+		if (trazable) {
+			traza += "--> "+actual;
+		}
+	}
+
+	if (trazable) {
+		traza += "<br>"+stopmsg;
+	}
+	
+	return final.includes(actual.split(",")[0]);
+}
+
+function cambiaEstado(letra,estadoComaPila){
+	var aux = estadoComaPila.split(",");
+	if (aux[1].length <= 0) {
+		stopmsg = "Intenta transición con pila vacía";
+		return "error";
+	}
+
+	var busca = "("+aux[0]+","+letra+","+aux[1].charAt(0)+")";
+	var k = par.indexOf(busca);
+	if (k>=0) { // existe transición
+		if (nuevotope[k]=="_") // desempila
+			return resultado[k]+","+pop(aux[1]);
+		else				   // empila
+
+			return resultado[k]+","+newtop(aux[1],nuevotope[k]);
+	}
+	else { // no existe transicion
+		stopmsg = "Indeterminación para "+busca;
+		return "error";
+	}
+}
+
+function newtop(pilaString,tope){
+	pilaString = pop(pilaString);
+	return tope+pilaString;
+}
+
+function pop(pilaString){
+	return pilaString.substring(1);
+}
+
+function w(msg){
+	document.write(msg);
+}
+
+</script>
+</head>
+<body>
+
+<h3>Autómata Empilador</h3>
+Estados = {<script>w(estados);</script>}<br>
+Alfabeto = {<script>w(alfabeto);</script>}<br>
+Transiciones = {<script>w(delta.replace(/;/gi," , "));</script>}<br>
+Finales = {<script>w(finales);</script>}<br>
+Iniciales = {<script>w(inicial);</script>}<br>
+Palabras a procesar:<br>
+<table>
+<tr><td>
+<textarea cols=40 rows=12 id="todo">abab
+baba
+aababb
+bbaaba
+bbbbaaaaba
+b
+aba
+abba
+ababa
+ababbbbbb</textarea>
+</td>
+<td id="salida" bgcolor="#AAFFAA"></td>
+</tr>
+</table>
+<br>
+<input id="traza" type="checkbox" checked>Trazable
+<button onclick="procesaTodo()">Procesar</button>
+<div id="pasos"></div>
+</body>
+</html>
