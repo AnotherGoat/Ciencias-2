@@ -1,0 +1,60 @@
+<html>
+<head>
+	<title>AFND General</title>
+	<script>
+		var _traza = '';
+
+		function procesarPalabras(){
+			var tx = document.getElementById("palstx");
+			var pal = tx.value.split("\n");
+			var res = document.getElementById("salida")
+			res.innerHTML = "";
+			var out = "";
+			for(var i=0; i<pal.length; i++){
+				console.log("Palabra en proceso"+pal[i]);
+				res.innerHTML += "<br>"+pal[i]+"  ->  "+procesoAutomata(pal[i]);
+			}
+			document.getElementById("salida").innerHTML += _traza;
+		}
+
+		function procesoAutomata(palabra) {
+			var letras = ['a','b','c'];
+			var estadosActuales = [0,1];	// Estados iniciales
+						/*	w		       s 			 t 				*/
+			var delta = [	[[],[0,1],[]], [[1],[],[2]], [[],[0],[]]	];
+			var estadosFinales = [2];
+			
+			for(var k=0; k<palabra.length && estadosActuales.length>0; k++){
+				_traza += '<hr>Procesando palabra '+palabra+' letra '+palabra.charAt(k)+"<br>";
+				var estadosFuturos = [];
+				for(var estado of estadosActuales){
+					for(var l=0; l<letras.length; l++){
+						if(palabra.charAt(k) == letras[l])
+							delta[estado][l].forEach( e => estadosFuturos.push(e));
+					}
+					_traza += '<br>   estado '+estado+'  --> ';
+					for(var i=0; i<estadosFuturos.length; i++){
+						_traza +=' '+estadosFuturos[i];
+					}
+				}
+				estadosActuales = [... new Set(estadosFuturos)];
+			}
+
+			for(var final of estadosFinales){
+				if(estadosActuales.includes(final)){
+					_traza += '<br><h4>Aceptada '+true+'</h4><br>';
+					return true;
+				}
+			}
+			_traza += '<br><h4>Aceptada '+false+'</h4><br>';
+			return false;
+		}
+	</script>
+</head>
+<body>
+<h2>Prueba AFND</h2>
+<textarea id="palstx" rows="7" cols="15"></textarea>
+<input type="button" value="Procesar" onclick="procesarPalabras()">
+<div id="salida"></div>
+</body>
+</html>
