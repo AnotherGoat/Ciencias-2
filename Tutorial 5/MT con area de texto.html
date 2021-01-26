@@ -1,0 +1,66 @@
+<html>
+<head>
+    <script src="class.MaquinaTuring.js"></script>
+    <script>
+        function procesarTodo() {
+            // Obtiene datos de la entrada
+            var areaTexto = document.getElementById("entrada");
+            var texto = areaTexto.value;
+            var palabras = texto.split("\n");
+            var resultado = "";
+
+            // Procesa cada palabra
+            for (palabra of palabras) {
+                resultado += palabra+" --> "+bc.procesaPalabra(palabra)+"<br>";
+            }
+
+            // Actualiza la salida en el documento HTML
+            document.getElementById("salida").innerHTML = resultado;
+        }
+    </script>
+    <style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    </style>
+</head>
+<body>
+    <script>
+        
+        // Configuración de la máquina de Turing
+        var bc = new MaquinaTuring("a^n c b^n, n >= 0");
+        bc.fija_estados("s,t,w,v,p,f");
+        bc.fija_estado_inicial("s");
+        bc.fija_estados_finales("f");
+        bc.agrega_transicion("s","a","t","A","D");
+        bc.agrega_transicion("s","c","p","c","D");
+        bc.agrega_transicion("t","a","t","a","D");
+        bc.agrega_transicion("t","c","w","c","D");
+        bc.agrega_transicion("w","B","w","B","D");
+        bc.agrega_transicion("w","b","v","B","I");
+        bc.agrega_transicion("v","a","v","a","I");
+        bc.agrega_transicion("v","c","v","c","I");
+        bc.agrega_transicion("v","B","v","B","I");
+        bc.agrega_transicion("v","A","s","A","D");
+        bc.agrega_transicion("p","B","p","B","D");
+        bc.agrega_transicion("p","#","f","#","I");
+
+    </script>
+
+<h1>M&aacutequina de Turing</h1>
+<hr>
+<table><tr><th>Palabras:</th><th>Resultado:</th></tr>
+<tr>
+<td><textarea id="entrada" rows="15" cols="40" placeholder="Ingrese aqu&iacute las palabras que quiere evaluar">
+acb
+aacbb
+aaacbbb
+abc
+cbabcaa
+aaacccbbb</textarea></td>
+<td id="salida" bgcolor="#FFAAAA"></td>
+</tr></table>
+<input type="button" value="Procesar" onclick="procesarTodo()">
+</body>
+</html>

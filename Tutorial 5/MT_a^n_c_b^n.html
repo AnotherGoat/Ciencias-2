@@ -1,0 +1,30 @@
+<html>
+<head>
+    <script src="class.MaquinaTuring.js"></script>
+</head>
+<body>
+    <script>
+        
+        var bc = new MaquinaTuring("a^n c b^n, n >= 0");
+        bc.fija_estados("s,t,w,v,p,f");
+        bc.fija_estado_inicial("s");
+        bc.fija_estados_finales("f");
+        bc.agrega_transicion("s","a","t","A","D");
+        bc.agrega_transicion("s","c","p","c","D");
+        bc.agrega_transicion("t","a","t","a","D");
+        bc.agrega_transicion("t","c","w","c","D");
+        bc.agrega_transicion("w","B","w","B","D");
+        bc.agrega_transicion("w","b","v","B","I");
+        bc.agrega_transicion("v","a","v","a","I");
+        bc.agrega_transicion("v","c","v","c","I");
+        bc.agrega_transicion("v","B","v","B","I");
+        bc.agrega_transicion("v","A","s","A","D");
+        bc.agrega_transicion("p","B","p","B","D");
+        bc.agrega_transicion("p","#","f","#","I");
+
+        //document.writeln(bc.procesaPalabra("aaacbbb"));
+        document.writeln(bc.procesaPalabra("aaacccbbb"));
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<html>
+<head>
+    <script src="class.MaquinaTuring.js"></script>
+</head>
+<body>
+    <script>
+        
+        var bc = new MaquinaTuring("b en el centro");
+        bc.fija_estados("qo,q1,q2,f,r,s");
+        bc.fija_estado_inicial("qo");
+        bc.fija_estados_finales("f");
+        bc.agrega_transicion("qo","a","q1","X","D");
+        bc.agrega_transicion("qo","b","q2","X","D");
+        bc.agrega_transicion("q2","Y","f","Y","I");
+        bc.agrega_transicion("q2","a","q1","a","D");
+        bc.agrega_transicion("q2","b","q1","b","D");
+        bc.agrega_transicion("q1","b","q1","b","D");
+        bc.agrega_transicion("q1","a","q1","a","D");
+        bc.agrega_transicion("q1","Y","r","Y","I");
+        bc.agrega_transicion("q1","#","r","#","I");
+        bc.agrega_transicion("r","a","s","Y","I");
+        bc.agrega_transicion("r","b","s","Y","I");
+        bc.agrega_transicion("s","Y","s","Y","I");
+        bc.agrega_transicion("s","a","s","a","I");
+        bc.agrega_transicion("s","b","s","b","I");
+        bc.agrega_transicion("s","X","qo","X","D");
+
+        document.writeln(bc.procesaPalabra("aabaabaabaa"));
+        //document.writeln(bc.procesaPalabra("aaaabbbb"));
+
+    </script>
+</body>
+</html>
